@@ -48,11 +48,11 @@ function StatsSection() {
             </Card>
             <Card>
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">Current Fee APY</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-500">Current Platform Fee</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">
-                        {feeAPY ? (Number(feeAPY) / 10).toFixed(1) : '0'}%
+                        {feeAPY ? (Number(feeAPY) / 100).toFixed(2) : '0'}%
                     </div>
                 </CardContent>
             </Card>
@@ -79,7 +79,7 @@ function ControlsSection() {
     const handleUpdateFee = () => {
         const apyValue = parseInt(newFee);
         if (isNaN(apyValue) || apyValue < 0 || apyValue > 1000) {
-            toast.error("Enter a valid APY (0-1000)");
+            toast.error("Enter a valid Rate (0-1000)");
             return;
         }
         changeFee(apyValue);
@@ -124,7 +124,7 @@ function ControlsSection() {
                     <h4 className="text-sm font-semibold">Update Platform Fee</h4>
                     <div className="flex gap-2">
                         <Input
-                            placeholder="APY (e.g. 50 = 5%)"
+                            placeholder="Rate (e.g. 100 = 1%)"
                             type="number"
                             value={newFee}
                             onChange={(e) => setNewFee(e.target.value)}
@@ -137,7 +137,7 @@ function ControlsSection() {
                         </Button>
                     </div>
                     <p className="text-xs text-gray-500">
-                        Current: {feeAPY ? (Number(feeAPY) / 10).toFixed(1) : 0}%
+                        Current: {feeAPY ? (Number(feeAPY) / 100).toFixed(2) : 0}%
                     </p>
                 </div>
 
