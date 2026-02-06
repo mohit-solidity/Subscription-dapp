@@ -1,0 +1,4 @@
+﻿src/hooks/useSmartWrite.ts(35,55): error TS2322: Type 'string | number' is not assignable to type 'string | undefined'.
+  Type 'number' is not assignable to type 'string'.
+src/hooks/useSmartWrite.ts(43,57): error TS2322: Type 'string | number' is not assignable to type 'string | undefined'.
+  Type 'number' is not assignable to type 'string'.

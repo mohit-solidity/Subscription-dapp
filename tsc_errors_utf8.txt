@@ -1,0 +1,8 @@
+﻿src/app/creator/[address]/page.tsx(22,13): error TS2339: Property 'planIds' does not exist on type '{ plans: Plan[]; isLoading: boolean; }'.
+src/app/creator/[address]/page.tsx(22,72): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type '`0x${string}` | undefined'.
+  Type 'string' is not assignable to type '`0x${string}`'.
+src/app/creator/[address]/page.tsx(50,38): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/app/dashboard/creator/page.tsx(105,13): error TS2339: Property 'planIds' does not exist on type '{ plans: Plan[]; isLoading: boolean; }'.
+src/app/dashboard/creator/page.tsx(105,56): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type '`0x${string}` | undefined'.
+  Type 'string' is not assignable to type '`0x${string}`'.
+src/app/dashboard/creator/page.tsx(121,38): error TS7006: Parameter 'id' implicitly has an 'any' type.
