@@ -25,12 +25,8 @@ export default function CreatorPage() {
 
     const activePlanId = activePlanIdResult ? Number(activePlanIdResult) : 0;
 
-    const plans = useMemo(() => {
-        if (activePlanId > 0) {
-            return allPlans.filter(p => p.planId === activePlanId);
-        }
-        return allPlans;
-    }, [allPlans, activePlanId]);
+    const plans = allPlans; // Show all plans, no filtering
+
 
     if (!address) return <div className="p-12 text-center">Invalid Address</div>;
 
@@ -66,7 +62,13 @@ export default function CreatorPage() {
                 ) : (
                     <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {plans.map((plan) => (
-                            <SubscriptionPlanCard key={plan.planId} planId={plan.planId} creatorAddress={address} />
+                            <SubscriptionPlanCard
+                                key={plan.planId}
+                                planId={plan.planId}
+                                creatorAddress={address}
+                                isActiveSubscription={plan.planId === activePlanId}
+                                isSubscriber={activePlanId > 0}
+                            />
                         ))}
                     </div>
                 )}
@@ -75,7 +77,17 @@ export default function CreatorPage() {
     );
 }
 
-function SubscriptionPlanCard({ planId, creatorAddress }: { planId: number, creatorAddress: string }) {
+function SubscriptionPlanCard({
+    planId,
+    creatorAddress,
+    isActiveSubscription,
+    isSubscriber
+}: {
+    planId: number,
+    creatorAddress: string,
+    isActiveSubscription: boolean,
+    isSubscriber: boolean
+}) {
     const { address: userAddress } = useAccount();
 
     const { data: plan } = useReadContract({
@@ -84,14 +96,6 @@ function SubscriptionPlanCard({ planId, creatorAddress }: { planId: number, crea
         functionName: 'creatorPlans',
         args: [creatorAddress as `0x${string}`, BigInt(planId)],
         query: { enabled: !!creatorAddress }
-    });
-
-    const { data: isValidSub } = useReadContract({
-        abi: CONTRACT_ABI,
-        address: CONTRACT_ADDRESS,
-        functionName: 'isValidSubscription',
-        args: userAddress ? [userAddress as `0x${string}`, creatorAddress as `0x${string}`] : undefined,
-        query: { enabled: !!userAddress && !!creatorAddress }
     });
 
     const { buySubscription, giftSubscription, isBuying, isGifting } = useUserActions();
@@ -122,66 +126,80 @@ function SubscriptionPlanCard({ planId, creatorAddress }: { planId: number, crea
         } catch (e) { /* Error handled in hook */ }
     };
 
-    const isAlreadySubscribed = isValidSub === true;
-
     return (
-        <Card className="hover:border-blue-500 transition-all border-2 border-transparent bg-white dark:bg-gray-900 shadow-xl">
-            <CardHeader>
+        <Card className={`transition-all border-2 bg-white dark:bg-gray-900 shadow-xl ${isActiveSubscription ? 'border-green-500 ring-2 ring-green-500/20' : 'hover:border-blue-500 border-transparent'
+            }`}>
+            <CardHeader className="relative">
+                {isActiveSubscription && (
+                    <div className="absolute top-2 right-2 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Current Plan
+                    </div>
+                )}
                 <CardTitle className="text-xl">Plan #{planId}</CardTitle>
                 <div className="text-4xl font-bold my-4">{priceEth} ETH</div>
                 <div className="text-gray-500 text-sm">Valid for {days} days</div>
             </CardHeader>
             <CardContent className="space-y-4">
-                {isAlreadySubscribed ? (
-                    <Button disabled className="w-full bg-green-600 dark:bg-green-700 text-white opacity-100">
-                        Active Subscription
-                    </Button>
-                ) : (
-                    <>
-                        {!isGiftingMode ? (
-                            <div className="space-y-3">
-                                <Button
-                                    className="w-full"
-                                    size="lg"
-                                    onClick={handleBuy}
-                                    isLoading={isBuying}
-                                >
-                                    Subscribe Now
-                                </Button>
+                {!isGiftingMode ? (
+                    <div className="space-y-3">
+                        {!isActiveSubscription && (
+                            <Button
+                                className="w-full"
+                                size="lg"
+                                onClick={handleBuy}
+                                isLoading={isBuying}
+                            >
+                                Subscribe Now
+                            </Button>
+                        )}
+
+                        {isSubscriber ? (
+                            <Button
+                                variant={isActiveSubscription ? "primary" : "outline"}
+                                className="w-full"
+                                onClick={() => setIsGiftingMode(true)}
+                            >
+                                Gift as Token
+                            </Button>
+                        ) : (
+                            <div className="relative group">
                                 <Button
                                     variant="outline"
-                                    className="w-full"
-                                    onClick={() => setIsGiftingMode(true)}
+                                    className="w-full opacity-50 cursor-not-allowed"
+                                    disabled
                                 >
                                     Gift as Token
                                 </Button>
-                            </div>
-                        ) : (
-                            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                                <Input
-                                    placeholder="Recipient Address (0x...)"
-                                    value={recipient}
-                                    onChange={(e) => setRecipient(e.target.value)}
-                                />
-                                <Button
-                                    className="w-full"
-                                    onClick={handleGift}
-                                    isLoading={isGifting}
-                                    disabled={!recipient}
-                                >
-                                    Send Gift
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setIsGiftingMode(false)}
-                                    className="w-full"
-                                >
-                                    Cancel
-                                </Button>
+                                <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded whitespace-nowrap z-50">
+                                    Subscribe to unlock gifting
+                                </div>
                             </div>
                         )}
-                    </>
+                    </div>
+                ) : (
+                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
+                        <Input
+                            placeholder="Recipient Address (0x...)"
+                            value={recipient}
+                            onChange={(e) => setRecipient(e.target.value)}
+                        />
+                        <Button
+                            className="w-full"
+                            onClick={handleGift}
+                            isLoading={isGifting}
+                            disabled={!recipient}
+                        >
+                            Send Gift
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsGiftingMode(false)}
+                            className="w-full"
+                        >
+                            Cancel
+                        </Button>
+                    </div>
                 )}
             </CardContent>
         </Card>
