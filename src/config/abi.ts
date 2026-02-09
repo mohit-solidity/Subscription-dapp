@@ -1,32 +1,101 @@
 export const CONTRACT_ABI = [
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "planId",
+                "type": "uint256"
+            }
+        ],
+        "name": "activatePlan",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "constructor"
+        "type": "function"
     },
     {
         "inputs": [
             {
                 "internalType": "address",
-                "name": "",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "",
+                "name": "_creator",
                 "type": "address"
             }
         ],
-        "name": "activePlan",
-        "outputs": [
+        "name": "addCreator",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "planId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_price",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_duration",
                 "type": "uint256"
             }
         ],
-        "stateMutability": "view",
+        "name": "addPlan",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_creator",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "planId",
+                "type": "uint256"
+            }
+        ],
+        "name": "buyOrRenewSubscription",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint64",
+                "name": "_APY",
+                "type": "uint64"
+            }
+        ],
+        "name": "changeFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "collectFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
     },
     {
         "inputs": [
@@ -140,6 +209,19 @@ export const CONTRACT_ABI = [
         "type": "event"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "creatorWithdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -157,6 +239,42 @@ export const CONTRACT_ABI = [
         ],
         "name": "CreatorWithdraw",
         "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "planId",
+                "type": "uint256"
+            }
+        ],
+        "name": "deactivatePlan",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "planId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "_creator",
+                "type": "address"
+            }
+        ],
+        "name": "giftSubscription",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
     },
     {
         "anonymous": false,
@@ -188,6 +306,32 @@ export const CONTRACT_ABI = [
             }
         ],
         "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "pauseContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "Creator",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "planId",
+                "type": "uint256"
+            }
+        ],
+        "name": "PlanActivated",
         "type": "event"
     },
     {
@@ -229,6 +373,46 @@ export const CONTRACT_ABI = [
         "type": "event"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_creator",
+                "type": "address"
+            }
+        ],
+        "name": "removeCreator",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "resumeContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            }
+        ],
+        "name": "setCreatorData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -266,8 +450,25 @@ export const CONTRACT_ABI = [
         "type": "event"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "stateMutability": "payable",
         "type": "fallback"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
     },
     {
         "inputs": [
@@ -291,112 +492,6 @@ export const CONTRACT_ABI = [
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_creator",
-                "type": "address"
-            }
-        ],
-        "name": "addCreator",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "planId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_price",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_duration",
-                "type": "uint256"
-            }
-        ],
-        "name": "addPlan",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "planId",
-                "type": "uint256"
-            }
-        ],
-        "name": "activatePlan",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "planId",
-                "type": "uint256"
-            }
-        ],
-        "name": "deactivatePlan",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_creator",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "planId",
-                "type": "uint256"
-            }
-        ],
-        "name": "buySubscription",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint64",
-                "name": "_APY",
-                "type": "uint64"
-            }
-        ],
-        "name": "changeFee",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "collectFee",
-        "outputs": [],
-        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -471,19 +566,6 @@ export const CONTRACT_ABI = [
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "creatorWithdraw",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
             }
@@ -497,19 +579,6 @@ export const CONTRACT_ABI = [
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "planId",
-                "type": "uint256"
-            }
-        ],
-        "name": "deactivatePlan",
-        "outputs": [],
-        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -549,29 +618,6 @@ export const CONTRACT_ABI = [
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "planId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "_creator",
-                "type": "address"
-            }
-        ],
-        "name": "giftSubscription",
-        "outputs": [],
-        "stateMutability": "payable",
         "type": "function"
     },
     {
@@ -674,53 +720,6 @@ export const CONTRACT_ABI = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "pauseContract",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_creator",
-                "type": "address"
-            }
-        ],
-        "name": "removeCreator",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "renounceOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "resumeContract",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-            }
-        ],
-        "name": "setCreatorData",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "address",
@@ -756,22 +755,5 @@ export const CONTRACT_ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-            }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "stateMutability": "payable",
-        "type": "receive"
     }
 ] as const;

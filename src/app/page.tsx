@@ -1,6 +1,6 @@
 'use client';
 
-import { useAllCreators, useAllCreatorProfiles, useCreatorProfile } from '@/hooks/useContractData';
+import { useAllCreators, useAllCreatorProfiles, useCreatorProfile, useUserActivePlan } from '@/hooks/useContractData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -150,14 +150,36 @@ export default function Home() {
 }
 
 function CreatorCard({ address }: { address: string }) {
+  const { address: userAddress } = useAccount();
   const { data: profile } = useCreatorProfile(address);
+  const { data: activePlanIdResult } = useUserActivePlan(userAddress, address);
+
+  const activePlanId = activePlanIdResult ? Number(activePlanIdResult) : 0;
+  const isSubscribed = activePlanId > 0;
+
   if (!profile) return <Card className="h-64 animate-pulse bg-gray-50 dark:bg-gray-900 border-none shadow-sm" />;
 
   const [name, _, subscribers] = profile as [string, bigint, bigint];
 
   return (
-    <Card className="group relative hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-gray-100 dark:border-gray-800 overflow-hidden px-5 py-6 bg-white dark:bg-gray-900/50 backdrop-blur-sm hover:border-blue-500/50">
+    <Card className={`group relative hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 ${isSubscribed
+        ? 'border-blue-500 ring-2 ring-blue-500/20 dark:border-blue-400'
+        : 'border-gray-100 dark:border-gray-800'
+      } overflow-hidden px-5 py-6 bg-white dark:bg-gray-900/50 backdrop-blur-sm hover:border-blue-500/50`}>
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+      {/* Subscription Badge */}
+      {isSubscribed && (
+        <div className="absolute top-3 right-3 z-10">
+          <div className="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Subscribed
+          </div>
+        </div>
+      )}
+
       <CardHeader className="px-0 relative z-10">
         <CardTitle className=" text-2xl font-bold group-hover:text-blue-600 transition-colors">
           {name || 'Unnamed Creator'}
@@ -171,8 +193,11 @@ function CreatorCard({ address }: { address: string }) {
             <span className="text-xs text-gray-400 uppercase tracking-widest">Subscribers</span>
           </div>
           <Link href={`/creator/${address}`}>
-            <Button variant="outline" className="rounded-xl border-gray-200 dark:border-gray-800 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all shadow-sm">
-              Explore Profile
+            <Button variant="outline" className={`rounded-xl ${isSubscribed
+                ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                : 'border-gray-200 dark:border-gray-800'
+              } group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all shadow-sm`}>
+              {isSubscribed ? 'View Subscription' : 'Explore Profile'}
             </Button>
           </Link>
         </div>

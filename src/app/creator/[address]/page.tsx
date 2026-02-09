@@ -4,12 +4,14 @@ import { useParams } from 'next/navigation';
 import { useCreatorProfile, useUserActivePlan } from '@/hooks/useContractData';
 import { useCreatorPlansList } from '@/hooks/useCreatorPlansList';
 import { useUserActions } from '@/hooks/useUserActions';
+import { useSubscriptionExpiry } from '@/hooks/useSubscriptionExpiry';
 import { useReadContract, useAccount } from 'wagmi';
 import { CONTRACT_ABI } from '@/config/abi';
 import { CONTRACT_ADDRESS } from '@/config/contract';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Navbar } from '@/components/Navbar';
+import { SubscriptionExpiryDate } from '@/components/SubscriptionExpiryDate';
 import { formatEther } from 'viem';
 import { Input } from '@/components/ui/Input';
 import { useState, useMemo } from 'react';
@@ -102,6 +104,19 @@ function SubscriptionPlanCard({
     const [isGiftingMode, setIsGiftingMode] = useState(false);
     const [recipient, setRecipient] = useState('');
 
+    // Get subscription expiry data for active subscription
+    const {
+        isExpired,
+        daysRemaining,
+        hoursRemaining,
+        minutesRemaining,
+        isExpiringSoon,
+        isLoading: isLoadingExpiry
+    } = useSubscriptionExpiry(
+        isActiveSubscription ? userAddress : undefined,
+        isActiveSubscription ? creatorAddress : undefined
+    );
+
     if (!plan) return <Card className="animate-pulse h-64 shadow-sm" />;
 
     const [price, duration, isActive] = plan as [bigint, bigint, boolean];
@@ -109,10 +124,11 @@ function SubscriptionPlanCard({
 
     const days = Number(duration) / 86400;
     const priceEth = formatEther(price);
+    const durationSeconds = Number(duration);
 
     const handleBuy = async () => {
         try {
-            await buySubscription({ creator: creatorAddress, planId, price: priceEth });
+            await buySubscription({ creator: creatorAddress, planId, price: priceEth, duration: durationSeconds });
         } catch (e) { /* Error handled in hook */ }
     };
 
@@ -122,27 +138,94 @@ function SubscriptionPlanCard({
             return;
         }
         try {
-            await giftSubscription({ user: recipient, creator: creatorAddress, planId, price: priceEth });
+            await giftSubscription({ user: recipient, creator: creatorAddress, planId, price: priceEth, duration: durationSeconds });
         } catch (e) { /* Error handled in hook */ }
     };
 
+    // Format time remaining display
+    const getTimeRemainingText = () => {
+        if (isExpired) return "Expired";
+        if (daysRemaining !== null && daysRemaining > 0) {
+            return `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`;
+        }
+        if (hoursRemaining !== null && hoursRemaining > 0) {
+            return `${hoursRemaining} hour${hoursRemaining !== 1 ? 's' : ''} remaining`;
+        }
+        if (minutesRemaining !== null) {
+            return `${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''} remaining`;
+        }
+        return "Expiring soon";
+    };
+
     return (
-        <Card className={`transition-all border-2 bg-white dark:bg-gray-900 shadow-xl ${isActiveSubscription ? 'border-green-500 ring-2 ring-green-500/20' : 'hover:border-blue-500 border-transparent'
+        <Card className={`transition-all border-2 bg-white dark:bg-gray-900 shadow-xl ${isActiveSubscription
+            ? isExpired
+                ? 'border-red-500 ring-2 ring-red-500/20'
+                : isExpiringSoon
+                    ? 'border-yellow-500 ring-2 ring-yellow-500/20'
+                    : 'border-green-500 ring-2 ring-green-500/20'
+            : 'hover:border-blue-500 border-transparent'
             }`}>
             <CardHeader className="relative">
                 {isActiveSubscription && (
-                    <div className="absolute top-2 right-2 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Current Plan
+                    <div className={`absolute top-2 right-2 ${isExpired
+                        ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
+                        : isExpiringSoon
+                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
+                            : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+                        } text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider`}>
+                        {isExpired ? 'Expired' : 'Active'}
                     </div>
                 )}
                 <CardTitle className="text-xl">Plan #{planId}</CardTitle>
                 <div className="text-4xl font-bold my-4">{priceEth} ETH</div>
                 <div className="text-gray-500 text-sm">Valid for {days} days</div>
+
+                {/* Time Remaining Display */}
+                {isActiveSubscription && !isLoadingExpiry && (
+                    <div className={`mt-3 pt-3 border-t ${isExpired
+                        ? 'border-red-200 dark:border-red-800'
+                        : isExpiringSoon
+                            ? 'border-yellow-200 dark:border-yellow-800'
+                            : 'border-green-200 dark:border-green-800'
+                        }`}>
+                        {daysRemaining !== null ? (
+                            <>
+                                <div className={`text-sm font-semibold ${isExpired
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : isExpiringSoon
+                                        ? 'text-yellow-600 dark:text-yellow-400'
+                                        : 'text-green-600 dark:text-green-400'
+                                    }`}>
+                                    {isExpired ? '⚠️ Subscription Expired' : `⏱️ ${getTimeRemainingText()}`}
+                                </div>
+                                {isExpiringSoon && !isExpired && (
+                                    <div className="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
+                                        Renew soon to avoid interruption
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-sm font-semibold text-green-600 dark:text-green-400">
+                                ✓ Active Subscription
+                            </div>
+                        )}
+                    </div>
+                )}
             </CardHeader>
             <CardContent className="space-y-4">
+                {/* Expiry Date Display - Show full date/time for active subscriptions */}
+                {isActiveSubscription && userAddress && (
+                    <SubscriptionExpiryDate
+                        userAddress={userAddress}
+                        creatorAddress={creatorAddress}
+                    />
+                )}
+
                 {!isGiftingMode ? (
                     <div className="space-y-3">
-                        {!isActiveSubscription && (
+                        {/* Only show Subscribe button if user doesn't have an active subscription */}
+                        {!isSubscriber && (
                             <Button
                                 className="w-full"
                                 size="lg"
@@ -153,28 +236,26 @@ function SubscriptionPlanCard({
                             </Button>
                         )}
 
-                        {isSubscriber ? (
+                        {/* Show Renew button if subscription is expired */}
+                        {isActiveSubscription && isExpired && (
                             <Button
-                                variant={isActiveSubscription ? "primary" : "outline"}
-                                className="w-full"
-                                onClick={() => setIsGiftingMode(true)}
+                                className="w-full bg-red-600 hover:bg-red-700"
+                                size="lg"
+                                onClick={handleBuy}
+                                isLoading={isBuying}
                             >
-                                Gift as Token
+                                Renew Subscription
                             </Button>
-                        ) : (
-                            <div className="relative group">
-                                <Button
-                                    variant="outline"
-                                    className="w-full opacity-50 cursor-not-allowed"
-                                    disabled
-                                >
-                                    Gift as Token
-                                </Button>
-                                <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded whitespace-nowrap z-50">
-                                    Subscribe to unlock gifting
-                                </div>
-                            </div>
                         )}
+
+                        {/* Gift button - always available to everyone */}
+                        <Button
+                            variant={isActiveSubscription ? "primary" : "outline"}
+                            className="w-full"
+                            onClick={() => setIsGiftingMode(true)}
+                        >
+                            Gift as Token
+                        </Button>
                     </div>
                 ) : (
                     <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
